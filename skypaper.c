@@ -23,6 +23,7 @@
 #include <getopt.h>
 
 #include "renderer.c"
+#include "shader.c"
 
 #define SKYPAPER_VERSION "Developer 0\n"
 
@@ -71,5 +72,16 @@ int main(int argc, char** argv) {
     }
 
     renderer* rend = init_renderer();
-    render(rend);
+    // Load the shaders
+    char vertPath[] = "Shaders/";
+    strcat(vertPath, shader);
+    strcat(vertPath, "/vertex.glsl");
+
+    char fragPath[] = "Shaders/";
+    strcat(fragPath, shader);
+    strcat(fragPath, "/frag.glsl");
+
+    GLuint programID = loadShaders(vertPath, fragPath);
+
+    render(rend, programID);
 }

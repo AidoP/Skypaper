@@ -7,7 +7,6 @@
 #include <X11/extensions/shape.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
-#include <GL/glu.h>
 #include <X11/Xatom.h>
 
 // Renderer.h - Handles OpenGL Rendering code

@@ -1,6 +1,8 @@
 #include <string.h>
 
 #include <glad/glad.h>
+#include <sys/time.h>
+#include <unistd.h>
 #include "renderer.h"
 #include "util.c"
 
@@ -114,7 +116,7 @@ renderer* init_renderer() {
     gladLoadGL();
 
 
-    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     glGenVertexArrays(1, &(r->vertexArray));
     glBindVertexArray(r->vertexArray);
 
@@ -124,7 +126,7 @@ renderer* init_renderer() {
     glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
 
     static const GLfloat quadVertexData[] = {
-        1.0f, -1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
         1.0f, -1.0f, 0.0f,
         -1.0f,  1.0f, 0.0f,
         1.0f,  1.0f, 0.0f,
@@ -133,36 +135,42 @@ renderer* init_renderer() {
     };
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
-    
-
-    glBindVertexArray(0);
 
     return r;
 }
 
-void render(renderer* r) {
+void render(renderer* r, GLuint shaderProgram) {
     XWindowAttributes winAttributes;
     XEvent event;
 
-    while(1) {
-        XNextEvent(r->display, &event);
-        
-        if(event.type == Expose) {
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            XGetWindowAttributes(r->display, r->window, &winAttributes);
-            glViewport(0, 0, winAttributes.width, winAttributes.height);
-
-            // Draw the quad
-            glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glDisableVertexAttribArray(0);
-            //glBindVertexArray(0);
-
-            glXSwapBuffers(r->display, r->window);
+    while(true) {
+        if(XPending(r->display) > 0){
+            XNextEvent(r->display, &event);
+            if(event.type == KeyPress) {
+            
+            }
         }
+        
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shaderProgram);
+        struct timeval tv;
+        gettimeofday(&tv, 0);
+        GLint uTimeLoc = glGetUniformLocation(shaderProgram, "time");
+        if (uTimeLoc != -1) 
+            glUniform1f(uTimeLoc, (float)tv.tv_usec); 
+
+        // Draw the quad
+        glBindVertexArray(r->vertexArray);
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisableVertexAttribArray(0);
+        glBindVertexArray(0);
+        glUseProgram(0);
+
+        glXSwapBuffers(r->display, r->window);
     }
 }
