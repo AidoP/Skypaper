@@ -5,9 +5,11 @@
 
 
 # Compile source
-libs="-ldl -lm -lX11 -lXext -lGLX -lGL -lGLU -lXrender"
+libs="-ldl -lpthread -lm -lX11 -lXext -lGLX -lGL -lGLU -lXrender"
 
-gcc skypaper.c $libs -o build/skypaper
+#gcc glad/src/glad.c -I glad/include -ldl -o glad.o
+
+gcc skypaper.c glad/src/glad.c $libs -o build/skypaper -I glad/include
 
 # Link objects
 

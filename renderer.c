@@ -1,26 +1,12 @@
 #include <string.h>
+
+#include <glad/glad.h>
 #include "renderer.h"
 #include "util.c"
 
-void DrawAQuad() {
- glClearColor(1.0, 1.0, 1.0, 1.0);
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+GLuint quadVertexBuffer;
 
- glMatrixMode(GL_PROJECTION);
- glLoadIdentity();
- glOrtho(-1., 1., -1., 1., 1., 20.);
-
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
- //gluLookAt(0., 0., 10., 0., 0., 0., 0., 1.1, 0.);
-
- glBegin(GL_QUADS);
-  glColor3f(1., 0., 0.); glVertex3f(-1., -1., 0.);
-  glColor3f(0., 1., 0.); glVertex3f( 1., -1., 0.);
-  glColor3f(0., 0., 1.); glVertex3f( 1.,  1., 0.);
-  glColor3f(1., 1., 0.); glVertex3f(-1.,  1., 0.);
- glEnd();
-} 
+typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
 renderer* init_renderer() {
     // Create the structure in memory
@@ -38,24 +24,74 @@ renderer* init_renderer() {
         memcpy(r->attributes, attributes, sizeof(attributes));
     }
 
-    if(!(r->visualInfo = glXChooseVisual(r->display, 0, r->attributes)))
+    int contextAttrs[] = {
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+        None
+    };
+
+
+    // Get config
+    GLXFBConfig* fbc;
+    int fbcSize, samp = -1, best = -1;
+    if(!(fbc = glXChooseFBConfig(r->display, DefaultScreen(r->display), r->attributes, &fbcSize)))
+        fatalError("Unable to get FBConfig");
+    for (int t = 0; t < fbcSize; ++t) {
+        XVisualInfo* xvi = glXGetVisualFromFBConfig(r->display, fbc[t]);
+        if (xvi) {
+            int samp_buf, samples;
+            glXGetFBConfigAttrib(r->display, fbc[t], GLX_SAMPLE_BUFFERS, &samp_buf);
+            glXGetFBConfigAttrib(r->display, fbc[t], GLX_SAMPLES,        &samples );
+            XRenderPictFormat* fmt = XRenderFindVisualFormat(r->display, xvi->visual);
+            
+            if (!fmt || fmt->direct.alphaMask == 0)
+                continue;
+            
+            if (best < 0 || (samp_buf && samples > samp)) {
+                best = t;
+                samp = samples;
+            }
+            XFree(xvi);
+        }
+    }
+
+    if (best == -1) {
+        fprintf(stderr, "Could not find suitable format for FBConfig\n");
+        abort();
+    }
+
+    r->config = fbc[best];
+    XFree(fbc);
+
+
+
+    if(!(r->visualInfo = glXGetVisualFromFBConfig(r->display, r->config)))
         fatalError("Unable to get visual info");
-    
-    // Create the context
-    if (!(r->context = glXCreateContext(r->display, r->visualInfo, NULL, GL_TRUE)))
+
+
+    // load function
+    glXCreateContextAttribsARBProc glXCreateContextAttribsARB = NULL;
+    glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc) glXGetProcAddressARB((const GLubyte*) "glXCreateContextAttribsARB");
+    if (!glXCreateContextAttribsARB)
+        fatalError("Unable to load glXCreateContextAttribsARB");
+
+    if (!(r->context = glXCreateContextAttribsARB(r->display, r->config, 0, True, contextAttrs)))
         fatalError("Unable to create GL context");
+
+    // Create the context
     glXMakeCurrent(r->display, r->root, r->context);
 
     XSetWindowAttributes winAttributes;
     winAttributes.colormap          = XCreateColormap(r->display, r->root, r->visualInfo->visual, AllocNone);
     winAttributes.event_mask        = ExposureMask | KeyPressMask;
     winAttributes.background_pixmap = None;
+    winAttributes.border_pixel      = 0;
 
 
     if (!(r->window = XCreateWindow(r->display, r->root,
                                0, 0, 1920, 1080, 0,
                                r->visualInfo->depth, InputOutput, r->visualInfo->visual,
-                               CWColormap | CWEventMask,
+                               CWColormap | CWEventMask | CWBackPixmap | CWBorderPixel,
                                &winAttributes)))
                                fatalError("Failed to create window");
 
@@ -74,7 +110,33 @@ renderer* init_renderer() {
     XSync(r->display, False);
     glXMakeCurrent(r->display, r->window, r->context);
  
-    glEnable(GL_DEPTH_TEST); 
+    // load OpenGL functions
+    gladLoadGL();
+
+
+    glEnable(GL_DEPTH_TEST);
+    glGenVertexArrays(1, &(r->vertexArray));
+    glBindVertexArray(r->vertexArray);
+
+
+    // Create quad data
+    glGenBuffers(1, &quadVertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+
+    static const GLfloat quadVertexData[] = {
+        1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
+        1.0f,  -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f
+    };
+    
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
+    
+
+    glBindVertexArray(0);
+
     return r;
 }
 
@@ -86,18 +148,21 @@ void render(renderer* r) {
         XNextEvent(r->display, &event);
         
         if(event.type == Expose) {
-                XGetWindowAttributes(r->display, r->window, &winAttributes);
-                glViewport(0, 0, winAttributes.width, winAttributes.height);
-                DrawAQuad(); 
-                glXSwapBuffers(r->display, r->window);
-        }
-                
-        else if(event.type == KeyPress) {
-                glXMakeCurrent(r->display, None, NULL);
-                glXDestroyContext(r->display, r->context);
-                XDestroyWindow(r->display, r->window);
-                XCloseDisplay(r->display);
-                exit(0);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            XGetWindowAttributes(r->display, r->window, &winAttributes);
+            glViewport(0, 0, winAttributes.width, winAttributes.height);
+
+            // Draw the quad
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDisableVertexAttribArray(0);
+            //glBindVertexArray(0);
+
+            glXSwapBuffers(r->display, r->window);
         }
     }
 }

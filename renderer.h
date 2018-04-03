@@ -3,6 +3,8 @@
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/Xrender.h>
+#include <X11/extensions/shape.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
@@ -17,6 +19,8 @@ typedef struct renderer {
     GLint attributes[5];
     XVisualInfo* visualInfo;
     GLXContext context;
+    GLuint vertexArray;
+    GLXFBConfig config;
 } renderer;
 
 
