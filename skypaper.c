@@ -73,15 +73,18 @@ int main(int argc, char** argv) {
 
     renderer* rend = init_renderer();
     // Load the shaders
-    char vertPath[] = "Shaders/";
+    char* vertPath = calloc(1, 250 * sizeof(char));
+    strcat(vertPath, "Shaders/");
     strcat(vertPath, shader);
     strcat(vertPath, "/vertex.glsl");
 
-    char fragPath[] = "Shaders/";
+    char* fragPath = calloc(1, 250 * sizeof(char));
+    strcat(fragPath, "Shaders/");
     strcat(fragPath, shader);
     strcat(fragPath, "/frag.glsl");
 
     GLuint programID = loadShaders(vertPath, fragPath);
-
+	free(vertPath);
+	free(fragPath);
     render(rend, programID);
 }

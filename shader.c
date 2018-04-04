@@ -5,8 +5,9 @@
 
 static const char* defaultVertexShader =    "#version 330 core\n"
                                             "layout(location = 0) in vec3 pos;\n"
+                                            "out vec4 fragment_position;\n"
                                             "void main() {\n"
-                                            "   gl_Position = vec4(pos.x, pos.y, 0.0F, 1.0F);\n"
+                                            "   gl_Position = fragment_position = vec4(pos.x, pos.y, 0.0F, 1.0F);\n"
                                             "}";
 
 GLuint loadShaders(const char* vertexPath, const char* fragPath) {
@@ -39,7 +40,7 @@ GLuint loadShaders(const char* vertexPath, const char* fragPath) {
 	} else{
         // Unable to open, use default
         if (vertexPath != 0)
-            printf("Invalid vertex shader path. Using default.\n");
+            printf("Invalid vertex shader path. Using default.\nPath: %s\n", vertexPath);
 		vertexShaderCode = defaultVertexShader;
 
 	}

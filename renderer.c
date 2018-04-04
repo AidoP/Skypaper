@@ -143,6 +143,8 @@ void render(renderer* r, GLuint shaderProgram) {
     XWindowAttributes winAttributes;
     XEvent event;
 
+    float res[2] = {1920.0f, 1080.0f};
+
     while(true) {
         if(XPending(r->display) > 0){
             XNextEvent(r->display, &event);
@@ -158,7 +160,12 @@ void render(renderer* r, GLuint shaderProgram) {
         gettimeofday(&tv, 0);
         GLint uTimeLoc = glGetUniformLocation(shaderProgram, "time");
         if (uTimeLoc != -1) 
-            glUniform1f(uTimeLoc, (float)tv.tv_usec); 
+            glUniform1f(uTimeLoc, (float)(((float)(tv.tv_sec % 1000)) + (((float)tv.tv_usec) / 1000000)));
+
+
+        GLint uResLoc = glGetUniformLocation(shaderProgram, "resolution");
+        if (uResLoc != -1) 
+            glUniform2fv(uResLoc, 1, res); 
 
         // Draw the quad
         glBindVertexArray(r->vertexArray);
@@ -172,5 +179,8 @@ void render(renderer* r, GLuint shaderProgram) {
         glUseProgram(0);
 
         glXSwapBuffers(r->display, r->window);
+
+        // Limit framerate (temp)
+        usleep(1000000/60);
     }
 }
