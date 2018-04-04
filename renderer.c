@@ -162,7 +162,6 @@ void render(renderer* r, GLuint shaderProgram) {
         if (uTimeLoc != -1) 
             glUniform1f(uTimeLoc, (float)(((float)(tv.tv_sec % 1000)) + (((float)tv.tv_usec) / 1000000)));
 
-
         GLint uResLoc = glGetUniformLocation(shaderProgram, "resolution");
         if (uResLoc != -1) 
             glUniform2fv(uResLoc, 1, res); 

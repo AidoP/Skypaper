@@ -37,6 +37,7 @@ GLuint loadShaders(const char* vertexPath, const char* fragPath) {
             fclose(vertexFile);
             fatalError("Unable to read vertex shader");
         }
+        fclose(vertexFile);
 	} else{
         // Unable to open, use default
         if (vertexPath != 0)
