@@ -20,7 +20,8 @@ $ git clone https://gitlab.com/AidoP1/skypaper.git
 $ cd skypaper
 $ meson build
 $ cd build
-$ ninja```
+$ ninja
+```
 
 You can now copy the binary to a safe place.
 You might want to put it out of the way and create a .desktop file to run it
@@ -37,7 +38,8 @@ For a better wallpaper, place a fragment shader at `~/.local/share/skypaper/shad
 ## Writing Shaders
 Skypaper defaults to OpenGL 3.3.0. Specify this by including the following at the top of your shaders.
 ```glsl
-#version 330 core```
+#version 330 core
+```
 
 #### TODO
 
@@ -55,7 +57,8 @@ out vec4 fragColor;
 in vec2 fragCoord;
 void main() {
     fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-}```
+}
+```
 
 ## License
 Skypaper is provided under the GNU General Public License 3.
