@@ -40,25 +40,27 @@ void read_file(const char* path, char** file_data) {
 
 
     // Reallocate memory for the read file data
-    *file_data = realloc(*file_data, file_size + 1);
+    free(*file_data);
+    *file_data = malloc(file_size + 1);
     if (!*file_data) {
         fclose(file);
         fatal_error("Unable to allocate memory");
     }
-    (*file_data)[0] = '\0';
 
     // Read from the file
     int read_status = fread(*file_data, file_size, 1, file);
     if (read_status != 1) {
         warning("Unable to read file");
 
-        *file_data = realloc(*file_data, strlen(SKYPAPER_FILE_READ_ERROR) + 1);
+        free(*file_data);
+        *file_data = malloc(strlen(SKYPAPER_FILE_READ_ERROR) + 1);
         if (!*file_data)
             fatal_error("Unable to allocate memory");
         (*file_data[0]) = '\0';
         strcpy(*file_data, SKYPAPER_FILE_READ_ERROR);
         return;
     }
+    (*file_data)[file_size] = '\0';
     
     // Close file and return read data
     fclose(file);
@@ -84,11 +86,11 @@ GLuint compile_shader(GLenum shader_type, const char* path) {
     GLuint shader_object = glCreateShader(shader_type);
     // Make sure to free shader_source when done
     char* shader_source;
-    if (!strcmp(path, "")) {
+    if (strcmp(path, "") != 0) {
         read_file(path, &shader_source);
 
         // If there was an error reading the shaders, use the defaults
-        if (strcmp(shader_source, SKYPAPER_FILE_OPEN_ERROR) || strcmp(shader_source, SKYPAPER_FILE_READ_ERROR)) {
+        if (strcmp(shader_source, SKYPAPER_FILE_OPEN_ERROR) == 0 || strcmp(shader_source, SKYPAPER_FILE_READ_ERROR) == 0) {
             warning("Shader not found or unable to read. Using default");
             free(shader_source);
             get_default_shader(shader_type, &shader_source);
