@@ -1,0 +1,5 @@
+#define VERSION "@version@"
+#define LICENCE_SHORT "@shortlicence@"
+#define SKYPAPER_WINDOW_TITLE "Skypaper - " VERSION
+
+#define ILUT_USE_OPENGL
