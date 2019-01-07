@@ -33,11 +33,14 @@ void create_skypaper_window() {
     glfwWindowHint(GLFW_BLUE_BITS, video_mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, video_mode->refreshRate);
 
+    // We want an undecorated window
+    glfwWindowHint(GLFW_DECORATED, false);
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Create the window
-    skypaper_settings.skypaper_window = glfwCreateWindow(video_mode->width, video_mode->height, SKYPAPER_WINDOW_TITLE, glfwGetPrimaryMonitor(), NULL);
+    skypaper_settings.skypaper_window = glfwCreateWindow(video_mode->width, video_mode->height, SKYPAPER_WINDOW_TITLE, NULL, NULL);
     if(!skypaper_settings.skypaper_window)
         fatal_error("Unable to create window");
     
