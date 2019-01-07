@@ -47,11 +47,28 @@ void create_skypaper_window() {
     glfwMakeContextCurrent(skypaper_settings.skypaper_window);
 
     {
-        // Tell X11 that this is a desktop window
         Window x11_window = glfwGetX11Window(skypaper_settings.skypaper_window);
         Display* x11_display = glfwGetX11Display();
+
+        // Some of these properties take no effect unless you remap the window
+        XUnmapWindow(x11_display, x11_window);
+
+        // Tell the WM that this is a desktop window
         Atom property_window_type = XInternAtom(x11_display, "_NET_WM_WINDOW_TYPE", false);
         Atom property_window_type_value = XInternAtom(x11_display, "_NET_WM_WINDOW_TYPE_DESKTOP", false);
         XChangeProperty(x11_display, x11_window, property_window_type, XA_ATOM, 32, PropModeReplace, (unsigned char*) &property_window_type_value, 1);
+
+        // Tell the WM that this window should be below others
+        Atom property_state = XInternAtom(x11_display, "_NET_WM_STATE", false);
+        Atom property_state_value = XInternAtom(x11_display, "_NET_WM_STATE_BELOW", false);
+        XChangeProperty(x11_display, x11_window, property_state, XA_ATOM, 32, PropModeAppend, (unsigned char*) &property_state_value, 1);
+
+        // Tell the WM to bind this window to all desktops
+        Atom property_desktop = XInternAtom(x11_display, "_NET_WM_DESKTOP", false);
+        long int property_desktop_value = 0xFFFFFFFF;
+        XChangeProperty(x11_display, x11_window, property_desktop, XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &property_desktop_value, 1);
+
+        // Map the window, updates for the previous property
+        XMapWindow(x11_display, x11_window);
     }
 }
