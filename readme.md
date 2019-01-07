@@ -2,6 +2,7 @@
 
 ## Installation
 **Dependencies**
+
 The [Meson](https://mesonbuild.com/index.html) build system
 - meson
 - pkg-config
@@ -14,6 +15,7 @@ Libraries
 Currently Linux is a hard dependency.
 
 **Compiling**
+
 Compilation is easy with [Meson](https://mesonbuild.com/index.html).
 ```bash
 $ git clone https://gitlab.com/AidoP1/skypaper.git
@@ -51,6 +53,7 @@ Outputs
 - `out vec4 fragColor`
 
 **Default Shader**
+
 ```glsl
 #version 330 core
 out vec4 fragColor;
