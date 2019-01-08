@@ -22,9 +22,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <getopt.h>
-#include <IL/il.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
 #include <string.h>
 
 #include "settings.h"

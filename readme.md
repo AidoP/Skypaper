@@ -33,6 +33,10 @@ $ mkdir $XDG_HOME_DATA/skypaper
 $ cp skypaper $XDG_HOME_DATA/skypaper
 ```
 
+## Planned Features
+- Reading the fragment shader from stdin
+- Various Uniforms for fragment and vertex shaders
+
 ## Usage
 Skypaper can be started directly after compilation to show the boring default shader.
 For a better wallpaper, place a fragment shader at `~/.local/share/skypaper/shaders/<shader_name>/frag.glsl` and execute skypaper with the `-s <shader_name>` argument. 

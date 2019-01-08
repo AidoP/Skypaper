@@ -1,5 +1,5 @@
 project('Skypaper','c')
-skypaper_sources = ['skypaper.c', 'util.c', 'window.c', 'render.c', 'shader.c']
+skypaper_sources = ['skypaper.c', 'util.c', 'window.c', 'render.c', 'shader.c', 'uniforms.c']
 
 include = include_directories('include')
 glad_library = shared_library('glad', 'glad/glad.c', dependencies: meson.get_compiler('c').find_library('dl'), include_directories : include, install : false)

@@ -1,7 +1,5 @@
-#pragma once
-
 /*
-    render - Display the wallpaper
+    uniforms - Functions to update shader uniform values
 
     Copyright (C) 2019  Aidan Prangnell (AidoP)
 
@@ -17,9 +15,20 @@
 
     A full copy of the license should be included with the source. If not see https://www.gnu.org/licenses/.
 */
-#include "settings.h"
+#include <GLFW/glfw3.h>
 
-void skypaper_start_rendering();
-void prepare_panel();
-void update_shader_uniforms();
-void initialise_shader_uniforms(GLint shader_program_object);
+void update_uniform_iTime(GLint uniform_location) {
+
+}
+
+void update_uniform_iTimeDelta(GLint uniform_location) {
+
+}
+
+void update_uniform_iResolution(GLint uniform_location) {
+
+}
+
+void update_uniform_iMouse(GLint uniform_location) {
+
+}

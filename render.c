@@ -17,9 +17,22 @@
 */
 #include "render.h"
 #include "shader.h"
+#include "uniforms.h"
 
 // Panel data
 static GLuint square_vertex_array;
+
+// This structure allows for many uniforms to be added without excessive repetition
+struct skypaper_uniform {
+    GLint location;
+    // This function should call all OpenGL functions needed to update the uniform
+    // The shader program will be "used" before execution
+    // Takes the uniform location as a parameter
+    void (*update_uniform_function)(GLint);
+};
+
+struct skypaper_uniform* skypaper_shader_uniforms;
+int skypaper_shader_uniforms_length;
 
 void skypaper_start_rendering() {
     prepare_panel();
@@ -32,14 +45,21 @@ void skypaper_start_rendering() {
     glEnableVertexAttribArray(vertex_buffer_attributes_object);
     glVertexAttribPointer(vertex_buffer_attributes_object, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+    // Populate the array of shader uniforms
+    initialise_shader_uniforms(shader_program_object);
+
     // Start render loop
     while (!glfwWindowShouldClose(skypaper_settings.skypaper_window)) {
         // Clear the screen
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw the panel
+
+        // Update shader uniforms
         glUseProgram(shader_program_object);
+        update_shader_uniforms();
+
+        // Draw the panel
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Draw the buffer and check for interrupts
@@ -49,6 +69,7 @@ void skypaper_start_rendering() {
 
     // Free memory
     glDeleteProgram(shader_program_object);
+    free(skypaper_shader_uniforms);
 
     // Close glfw as we are exiting
     glfwTerminate();
@@ -76,4 +97,34 @@ void prepare_panel() {
     // Send the buffer to the graphics device
     glBindBuffer(GL_ARRAY_BUFFER, square_vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(square_vertices), square_vertices, GL_STATIC_DRAW);
+}
+
+typedef void(*update_uniform_function_pointer)(GLint);
+
+void initialise_shader_uniforms(GLint shader_program_object) {
+    // Get the objects to bind
+    const char* uniform_names_array[]
+        = {"iTime", "iTimeDelta", "iResolution", "iMouse"};
+    update_uniform_function_pointer uniform_functions_array[]
+        = {&update_uniform_iTime, &update_uniform_iTimeDelta, update_uniform_iResolution, &update_uniform_iMouse};
+
+    // Get number of elements. Arrays MUST have an identical number of elements
+    int array_size = sizeof(uniform_names_array) / sizeof(uniform_names_array[0]);
+
+    // Define array
+    skypaper_shader_uniforms_length = array_size;
+    skypaper_shader_uniforms = malloc(sizeof(struct skypaper_uniform) * array_size);
+    
+    // Populate array of shader uniforms
+    for (int iteration = 0; iteration < array_size; iteration++) {
+        skypaper_shader_uniforms[iteration].location = glGetUniformLocation(shader_program_object, uniform_names_array[iteration]);
+        skypaper_shader_uniforms[iteration].update_uniform_function = uniform_functions_array[iteration];
+    }
+}
+
+void update_shader_uniforms() {
+    // Iterate through skypaper_shader_uniforms and run each function
+    for (int iteration = 0; iteration < skypaper_shader_uniforms_length; iteration++) {
+        (*skypaper_shader_uniforms[iteration].update_uniform_function)(skypaper_shader_uniforms[iteration].location);
+    }
 }
