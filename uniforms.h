@@ -17,6 +17,7 @@
 
     A full copy of the license should be included with the source. If not see https://www.gnu.org/licenses/.
 */
+#include "settings.h"
 
 /*
     All functions must be of type
