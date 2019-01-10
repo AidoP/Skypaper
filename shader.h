@@ -19,21 +19,12 @@
 */
 
 #include "settings.h"
-#include <string.h>
-#include <dirent.h>
 
-// Defines for errors
-#define SKYPAPER_FILE_OPEN_ERROR "__SKYPAPER_FILE_OPEN_ERROR__"
-#define SKYPAPER_FILE_READ_ERROR "__SKYPAPER_FILE_READ_ERROR__"
+char* get_default_shader(GLenum shader_type);
 
-void read_file(const char* path, char** file_data);
+GLuint compile_shader(GLenum shader_type, char** shader_source);
 
-
-void get_default_shader(GLenum shader_type, char** shader_source);
-
-GLuint compile_shader(GLenum shader_type, const char* path);
-
-GLuint load_shaders();
+GLuint load_shaders(char** fragment_shader_path, char** vertex_shader_path);
 
 
 // Default shaders

@@ -1,6 +1,6 @@
 #pragma once
 /*
-    settings - provides the data structure for storing global values and includes common headers
+    shader_read - Read in shaders from files
 
     Copyright (C) 2019  Aidan Prangnell (AidoP)
 
@@ -16,22 +16,9 @@
 
     A full copy of the license should be included with the source. If not see https://www.gnu.org/licenses/.
 */
+#include "settings.h"
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <dirent.h>
-
-#include "include/glad/glad.h"
-#include <GLFW/glfw3.h>
-
-#include "util.h"
-#include "build_config.h"
-
-struct {
-    char* fragment_shader_path;
-    char* vertex_shader_path;
-    bool is_windowed;
-    GLFWwindow* skypaper_window;
-} skypaper_settings;
+void read_file(char** path, char** file_data);
+bool check_for_shader_folder();
+void get_data_directory(char** data_directory_path);
+void get_from_shader_data_path(char** data_directory, char** shader_name, char** file_name, char** path);

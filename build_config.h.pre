@@ -21,3 +21,14 @@
 #define SKYPAPER_WINDOW_TITLE "Skypaper - " VERSION
 
 #define ILUT_USE_OPENGL
+
+#define HELP_STRING "Basic Usage: %s -f <path>\n"\
+                    "Run a GLSL shader as a desktop background\n"\
+                    "   Arguments:\n"\
+                    "       -f [path], --fragment[=path]   The path to the fragment shader\n"\
+                    "       -v [path], --vertex[=path]     The path to the vertex shader\n"\
+                    "       -s [name], --shader[=name]     Loads from the folder \"name\" at $XDG_HOME_DATA/skypaper/shaders/\n"\
+                    "       -w, --windowed                 Start in normal windowed mode\n"\
+                    "       -V, --version                  Prints the version\n"\
+                    "       -h, --help                     Prints this help\n"
+

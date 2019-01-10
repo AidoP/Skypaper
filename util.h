@@ -17,9 +17,10 @@
 
     A full copy of the license should be included with the source. If not see https://www.gnu.org/licenses/.
 */
-
-#include <stdio.h>
-#include <stdlib.h>
+#include "settings.h"
 
 void fatal_error(char* error_message);
 void warning(char* warning_message);
+
+// String handling for the shader paths
+void get_skypaper_paths();

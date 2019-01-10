@@ -17,7 +17,6 @@
 */
 
 #include "util.h"
-#include <string.h>
 
 void fatal_error(char* error_message) {
     fprintf(stderr, "Fatal Error: %s\n", error_message);

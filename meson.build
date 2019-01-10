@@ -1,5 +1,5 @@
 project('Skypaper','c')
-skypaper_sources = ['skypaper.c', 'util.c', 'window.c', 'render.c', 'shader.c', 'uniforms.c']
+skypaper_sources = ['skypaper.c', 'util.c', 'window.c', 'render.c', 'shader.c', 'uniforms.c', 'shader_read.c']
 
 include = include_directories('include')
 glad_library = shared_library('glad', 'glad/glad.c', dependencies: meson.get_compiler('c').find_library('dl'), include_directories : include, install : false)
@@ -11,6 +11,6 @@ executable('skypaper', sources : skypaper_sources, dependencies : skypaper_depen
 
 
 build_config = configuration_data()
-build_config.set('version', 'Dev 0')
+build_config.set('version', '1.0')
 build_config.set('shortlicence', 'Copyright (C) AidoP')
 configure_file(input : 'build_config.h.pre', output : 'build_config.h', configuration : build_config)

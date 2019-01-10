@@ -25,96 +25,66 @@
 #include <string.h>
 
 #include "settings.h"
+#include "shader_read.h"
 #include "window.h"
 #include "render.h"
 
 int main (int argc, char** argv) {
     /* initialise skypaper_settings */
     {
-        skypaper_settings.enable_textures = true;
-        skypaper_settings.transparent_window = true;
-        skypaper_settings.use_vertex_shader = false;
-        skypaper_settings.target_shader = "";
+        skypaper_settings.is_windowed   = false;
 
-        // Set the data directory to $XDG_DATA_HOME/skypaper
-        char* xdg_home = getenv("XDG_DATA_HOME");
-        char* home_path = getenv("HOME");
-        if (!home_path)
-            fatal_error("$HOME must be set");
-        if (!strcmp(home_path, ""))
-            warning("$HOME is empty. Assuming CWD is home.");
-
-        if (!xdg_home) {
-            char* subpath = "/.local/share";
-            xdg_home = malloc(strlen(home_path) + strlen(subpath) + 1);
-            xdg_home[0] = '\0';
-            strcat(xdg_home, home_path);
-            strcat(xdg_home, subpath);
-        } else if (!strcmp(xdg_home, "")) {
-            char* subpath = "/.local/share";
-            xdg_home = malloc(strlen(home_path) + strlen(subpath) + 1);
-            xdg_home[0] = '\0';
-            strcat(xdg_home, home_path);
-            strcat(xdg_home, subpath);
-        }
-        char* skypaper_home_directory = "/skypaper";
-        skypaper_settings.skypaper_data_directory = malloc(strlen(xdg_home) + strlen(skypaper_home_directory) + 1);
-        skypaper_settings.skypaper_data_directory[0] = '\0';
-        strcat(skypaper_settings.skypaper_data_directory, xdg_home);
-        strcat(skypaper_settings.skypaper_data_directory, skypaper_home_directory);
+        skypaper_settings.fragment_shader_path = NULL;
+        skypaper_settings.vertex_shader_path = NULL;
     }
 
     /* parse options */
     {
-        char opt;
-
-        char* option_layout = "hVvtas:";
+        char* option_layout = "hVf:v:s:w";
         static struct option option_list[] = {
-            {"shader",          required_argument,  NULL, 's'},
-            {"use-vertex",      no_argument,        NULL, 'v'},
-            {"version",         no_argument,        NULL, 'V'},
-            {"help",            no_argument,        NULL, 'h'},
-            {"no-texture",      no_argument,        NULL, 't'},
-            {"no-transparency", no_argument,        NULL, 'a'},
+            {"fragment",    required_argument,  NULL,                                   'f'},
+            {"vertex",      required_argument,  NULL,                                   'v'},
+            {"shader",      required_argument,  NULL,                                   's'},
+            {"windowed",    no_argument,        (int*) &skypaper_settings.is_windowed,  true},
+            {"version",     no_argument,        NULL,                                   'V'},
+            {"help",        no_argument,        NULL,                                   'h'},
             {0, 0, 0, 0}
         };
 
         // Get next option until none left
+        char opt;
         while ((opt = getopt_long(argc, argv, option_layout, option_list, NULL)) != -1) {
             // Handle each option
             switch (opt) {
-                case 's':
-                    skypaper_settings.target_shader = optarg;
+                case 'f':
+                    skypaper_settings.fragment_shader_path = optarg;
                     break;
                 case 'v':
-                    skypaper_settings.use_vertex_shader = true;
+                    skypaper_settings.vertex_shader_path = optarg;
                     break;
-                case 't':
-                    skypaper_settings.enable_textures = false;
-                    break;
-                case 'a':
-                    skypaper_settings.transparent_window = false;
-                    break;
-                case 'h':
-                    {
-                        // Print help text
-                        static const char* help_string =
-                            "Usage: %s -[hV] -s <shader>\n"
-                            "Skypaper - Live GLSL wallpaper for Linux\n"
-                            "   Arguments:\n"
-                            "       -s [name], --shader[=name]      The shader to draw\n"
-                            "       -v, --use-vertex                Try using a custom vertex shader\n"
-                            "       -t, --no-texture                Disable texture support\n"
-                            "       -a, --no-transparency           Don't use a transparent window\n"
-                            "       -V, --version                   Prints the verion\n"
-                            "       -h, --help                      Prints this help\n";
-                        printf(help_string, argv[0]);
-                        exit(EXIT_SUCCESS);
-                    }
+                case 's':
+                    if (!check_for_shader_folder())
+                        continue;
+
+                    char* data_directory_path;
+                    get_data_directory(&data_directory_path);
+
+                    char* frag_name = "frag.glsl";
+                    char* vertex_name = "vertex.glsl";
+
+                    // Set the paths
+                    get_from_shader_data_path(&data_directory_path, &optarg, &frag_name, &skypaper_settings.fragment_shader_path);
+                    get_from_shader_data_path(&data_directory_path, &optarg, &vertex_name, &skypaper_settings.vertex_shader_path);
+                    
                     break;
                 case 'V':
                     // Print version string
                     printf("Skypaper %s\n%s\n", VERSION, LICENCE_SHORT);
+                    exit(EXIT_SUCCESS);
+                    break;
+                case 'h':
+                    // Print help text
+                    printf(HELP_STRING, argv[0]);
                     exit(EXIT_SUCCESS);
                     break;
             }

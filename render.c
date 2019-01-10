@@ -38,7 +38,7 @@ void skypaper_start_rendering() {
     prepare_panel();
 
     // Load in the shader
-    GLuint shader_program_object = load_shaders();
+    GLuint shader_program_object = load_shaders(&skypaper_settings.fragment_shader_path, &skypaper_settings.vertex_shader_path);
     // Tell the shader program how to interpret the vertex buffer
     // Everything is still bound/linked from prepare_panel(), load_shaders()
     GLint vertex_buffer_attributes_object = glGetAttribLocation(shader_program_object, "vertexPosition");
