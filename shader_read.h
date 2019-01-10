@@ -22,3 +22,4 @@ void read_file(char** path, char** file_data);
 bool check_for_shader_folder();
 void get_data_directory(char** data_directory_path);
 void get_from_shader_data_path(char** data_directory, char** shader_name, char** file_name, char** path);
+bool try_read_stdin(char** read_data);

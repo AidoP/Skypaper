@@ -54,8 +54,8 @@ GLuint load_shaders(char** fragment_shader_path, char** vertex_shader_path) {
     if (*fragment_shader_path)
         read_file(fragment_shader_path, &fragment_shader_source);
     else {
-        fragment_shader_source = get_default_shader(GL_FRAGMENT_SHADER);
-        fprintf(stderr, "Path = %s", skypaper_settings.fragment_shader_path);
+        if (!try_read_stdin(&fragment_shader_source))
+            fragment_shader_source = get_default_shader(GL_FRAGMENT_SHADER);
     }
 
     if (*vertex_shader_path)

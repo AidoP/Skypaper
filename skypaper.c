@@ -40,9 +40,9 @@ int main (int argc, char** argv) {
 
     /* parse options */
     {
-        char* option_layout = "hVf:v:s:w";
+        char* option_layout = "hVf::v:s:w";
         static struct option option_list[] = {
-            {"fragment",    required_argument,  NULL,                                   'f'},
+            {"fragment",    optional_argument,  NULL,                                   'f'},
             {"vertex",      required_argument,  NULL,                                   'v'},
             {"shader",      required_argument,  NULL,                                   's'},
             {"windowed",    no_argument,        (int*) &skypaper_settings.is_windowed,  true},
@@ -57,8 +57,19 @@ int main (int argc, char** argv) {
             // Handle each option
             switch (opt) {
                 case 'f':
-                    skypaper_settings.fragment_shader_path = optarg;
-                    break;
+                    {
+                        bool use_stdin = false;
+                        if (!optarg)
+                            use_stdin = true;
+                        else if (optarg[0] == '\0')
+                            use_stdin = true;
+
+                        if (use_stdin)
+                            skypaper_settings.fragment_shader_path = NULL;
+                        else
+                            skypaper_settings.fragment_shader_path = optarg;
+                        break;
+                    }
                 case 'v':
                     skypaper_settings.vertex_shader_path = optarg;
                     break;

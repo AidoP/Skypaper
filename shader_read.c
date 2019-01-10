@@ -28,7 +28,7 @@ void read_file(char** path, char** file_data) {
     // Open file for reading only
     FILE* file = fopen(*path, "r");
     if (!file) {
-        fprintf(stderr, "Unable to open %s", *path);
+        fprintf(stderr, "Unable to open %s\n", *path);
         return;
     }
 
@@ -49,11 +49,14 @@ void read_file(char** path, char** file_data) {
     // Read from the file
     int read_status = fread(*file_data, file_size, 1, file);
     if (read_status != 1) {
-        fprintf(stderr, "Unable to read %s", *path);
+        fprintf(stderr, "Unable to read %s\n", *path);
         **file_data = '\0';
         return;
     }
     (*file_data)[file_size] = '\0';
+
+
+    fprintf(stderr, "Shader source=\n%s", *file_data);
     
     // Close file and return read data
     fclose(file);
@@ -99,7 +102,7 @@ bool check_for_shader_folder() {
 
     DIR* directory = opendir(shader_folder_path);
     if (!directory) {
-        fprintf(stderr, "Folder missing. Could not open %s", shader_folder_path);
+        fprintf(stderr, "Folder missing. Could not open %s\n", shader_folder_path);
         folder_exists = false;
     }
     closedir(directory);
@@ -123,4 +126,23 @@ void get_from_shader_data_path(char** data_directory, char** shader_name, char**
     strcat(*path, *shader_name);
     strcat(*path, "/");
     strcat(*path, *file_name);
+}
+
+#include <unistd.h>
+bool try_read_stdin(char** read_data) {
+    // Allocate a 1MiB buffer
+    int buffer_size = 1048576;
+    *read_data = malloc(buffer_size);
+    if (!*read_data)
+        return false;
+    // Read in to a max of one less than the buffer size
+    int read_size = read(0, *read_data, buffer_size - 1);
+
+    // Return if failed
+    if (read_size < 0)
+        return false;
+
+    // Ensure string is null terminating
+    (*read_data)[read_size + 1] = '\0';
+    return true;
 }
